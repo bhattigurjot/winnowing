@@ -153,14 +153,14 @@ function updateValues(id) {
     for(var i=0; i < commandsJSON.versions.length; i++) {
         if (commandsJSON.versions[i].id === id) {
             var temp = commandsJSON.versions[i].title.split(" ");
-            minimumCount = parseInt(temp[temp.indexOf("-min") + 1]);
-            numberPCAComponents = parseInt(temp[temp.indexOf("-p") + 1]);
+            // minimumCount = parseInt(temp[temp.indexOf("-min") + 1]);
+            // numberPCAComponents = parseInt(temp[temp.indexOf("-p") + 1]);
+            $('#conditioningType').val(temp[temp.indexOf("-c") + 1]);
+            $('#evaluationType').val(temp[temp.indexOf("-e") + 1]);
+            $('#metricType').val(temp[temp.indexOf("-m") + 1]).change();
             break;
         }
     }
-
-    // console.log(minimumCount, numberPCAComponents);
-    // createGUI();
 }
 
 function pressRun() {
