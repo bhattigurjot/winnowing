@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Winno</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>-->
+    <script src="js/rangeslider.min.js"></script>
+
+    <!--<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">-->
+
+    <!--<script src="js/sketch.js"></script>-->
+    <script src="js/other.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.1/vis.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.1/vis.min.css">
+
+
+
+</head>
+<body>
+<!--<div id="canvasContainer"></div>-->
+<div id="pipeline">
+    <div class="box" style="left: 14px; top: 100px;">
+        <div class="b-title">
+            <h4>Conditioning</h4>
+        </div>
+        <div class="b-content">
+            <fieldset>
+                <label for="conditioningType">conditioningType</label>
+                <br>
+                <select name="conditioningType" class="fieldChange" id="conditioningType">
+                </select>
+            </fieldset>
+            <fieldset>
+                <label for="minimumCount">minimumCount:</label>
+                <br>
+                <input class="rangeChange" id="minimumCount" type="range" min="0" max="10" data-rangeslider>
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="box" style="left: 224px; top: 100px;">
+        <div class="b-title">
+            <h4>Metrics</h4>
+        </div>
+        <div class="b-content">
+            <fieldset>
+                <label for="metricType">metricType</label>
+                <br>
+                <select name="metricType" class="fieldChange" id="metricType">
+                </select>
+            </fieldset>
+            <div id="metric-1">
+                <fieldset>
+                    <label for="numberPCAComponents">numberPCAComponents:</label>
+                    <br>
+                    <input type="range" id="numberPCAComponents">
+                </fieldset>
+            </div>
+            <div id="metric-2">
+                <fieldset>
+                    <label for="correlationType">correlationType</label>
+                    <br>
+                    <select name="correlationType" class="fieldChange" id="correlationType">
+                    </select>
+                </fieldset>
+                <fieldset>
+                    <label for="correlationProperty">correlationProperty</label>
+                    <br>
+                    <select name="correlationProperty" class="fieldChange" id="correlationProperty">
+                    </select>
+                </fieldset>
+                <fieldset>
+                    <label for="weighted">weighted</label>
+                    <br>
+                    <select name="weighted" class="fieldChange" id="weighted">
+                    </select>
+                </fieldset>
+                <fieldset>
+                    <label for="centralityType">centralityType</label>
+                    <br>
+                    <select name="centralityType" class="fieldChange" id="centralityType">
+                    </select>
+                </fieldset>
+                <fieldset>
+                    <label for="threshold">threshold:</label>
+                    <br>
+                    <input id="threshold" type="range" min="0" max="10" data-rangeslider>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+
+    <div class="box" style="left: 464px; top: 100px;">
+        <div class="b-title">
+            <h4>Reduction</h4>
+        </div>
+        <div class="b-content">
+            <fieldset>
+                <label for="selectTotal">selectTotal:</label>
+                <br>
+                <input type="range" id="selectTotal">
+            </fieldset>
+            <fieldset>
+                <label for="selectPerIteration">selectPerIteration:</label>
+                <br>
+                <input type="range" id="selectPerIteration">
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="box" style="left: 664px; top: 100px;">
+        <div class="b-title">
+            <h4>Evaluation</h4>
+        </div>
+        <div class="b-content">
+            <fieldset>
+                <label for="conditioningType">evaluationType</label>
+                <br>
+                <select name="evaluationType" class="fieldChange" id="evaluationType">
+                </select>
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="box" style="left: 854px; top: 100px;">
+        <div class="b-title">
+            <h4>Data Storage</h4>
+        </div>
+        <div class="b-content">
+            <fieldset>
+                <label for="outputToCSV">outputToCSV</label>
+                <br>
+                <select name="outputToCSV" id="outputToCSV">
+                </select>
+            </fieldset>
+            <fieldset>
+                <label for="saveToDatabase">saveToDatabase</label>
+                <br>
+                <select name="saveToDatabase" id="saveToDatabase">
+                </select>
+            </fieldset>
+            <fieldset>
+                <label for="createGraphs">createGraphs</label>
+                <br>
+                <select name="createGraphs" id="createGraphs">
+                </select>
+            </fieldset>
+        </div>
+    </div>
+    <input type="button" class="run-button" id="runButton" value="Run">
+
+</div>
+<div class="current-command">
+    <span id="currentCommand">Dummy</span>
+</div>
+<div class="treeContainer">
+    <div id="treeDiv"></div>
+    <div id="treeDiv-legend">
+        <ul class="tree-ul">
+            <li class="tree-li" id="li-sn"><span>Selected Node</span></li>
+            <li class="tree-li" id="li-cwn"><span>Current Working Node</span></li>
+            <li class="tree-li" id="li-on"><span>Other Nodes</span></li>
+        </ul>
+    </div>
+    <div id="edit-popUp">
+        <h4 id="edit-operation">Edit Node</h4>
+
+        <label for="edit-label" class="control-label">Label</label>
+
+        <input id="edit-label" value="New value"/>
+
+        <input type="button" value="Cancel" id="edit-cancel"/>
+        <input type="button" value="Save" id="edit-save"/>
+    </div>
+</div>
+<div id="results"></div>
+
+<script src="js/treeVis.js"></script>
+</body>
+</html>

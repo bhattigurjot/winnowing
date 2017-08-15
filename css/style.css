@@ -13,6 +13,85 @@
     width: 1198px;
 }
 
+#pipeline {
+    /*position: fixed;*/
+    top: 0;
+    left: 0;
+    width: 1198px;
+    height: 665px;
+}
+/*.no-close .ui-dialog-titlebar-close {*/
+    /*display: none;*/
+/*}*/
+
+.box {
+    position: absolute;
+    display: inline-block;
+}
+
+.b-title {
+    margin: 0;
+    height: 100px;
+    top: -0px;
+    background: #393939;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* vertically aligns items */
+    align-items: center; /* horizontally aligns items */
+}
+
+.b-title > h4 {
+    margin: 0;
+    color: white;
+    font-size: large;
+}
+
+.b-content {
+    /*display:flex;*/
+    align-items: center;
+    justify-content:center;
+    background-color:#acacac;
+    padding: 10px;
+}
+
+.b-content > label {
+    color: #000000;
+}
+
+.current-command {
+    color: black;
+    width: 1198px;
+    padding: 20px;
+}
+.run-button {
+    background-color:#44c767;
+    -moz-border-radius:28px;
+    -webkit-border-radius:28px;
+    border-radius:28px;
+    border:1px solid #18ab29;
+    display:inline-block;
+    cursor:pointer;
+    color:#ffffff;
+    font-family:Arial;
+    font-size:17px;
+    padding:16px 31px;
+    text-decoration:none;
+    text-shadow:0px 1px 0px #2f6627;
+    position: absolute;
+    bottom: 350px;
+    right: 650px;
+    outline: none;
+}
+.run-button:hover {
+    background-color:#5cbf2a;
+}
+/*.run-button:active {*/
+    /*position:relative;*/
+    /*top:1px;*/
+/*}*/
+
+/* Tree */
 .treeContainer {
     z-index: 10;
     width: 420px;
