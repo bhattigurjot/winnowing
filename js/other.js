@@ -257,10 +257,13 @@ function requestListener () {
         commandResponse = "No response from program execution."
     } else {
         // create links for output files
+        var temp = "";
         if ($('#metricType').val() === "pca_importance") {
-            $('#centralityType').val("None");
+            temp = "None";
+        } else {
+            temp = $('#centralityType').val();
         }
-        var namebase = "bromeA_all-" + $('#metricType').val() + "-" + $('#centralityType').val() + "-select" +  $('#selectTotal').val() + "by" + $('#selectPerIteration').val();
+        var namebase = "bromeA_all-" + $('#metricType').val() + "-" + temp + "-select" +  $('#selectTotal').val() + "by" + $('#selectPerIteration').val();
         var filename1 = namebase + ".csv";
         var filename2 = namebase + "-abundances.csv";
     }
