@@ -1,21 +1,48 @@
 var conditioningType = ['add_one','hellinger','none'];
-var minimumCount = 3;
 var metricType = ['pca_importance','graph_centrality'];
-var numberPCAComponents = 4;
 var correlationType = ['spearman','MIC'];
 var correlationProperty = ['positive','negative','both'];
 var weighted = [true,false];
 var centralityType = ['betweenness','closeness','degree','none'];
-var threshold = 0.5;
-var selectTotal = 25;
-var oldSelectTotal = 25;
-var selectPerIteration = 10;
 var evaluationType = ['kl_divergence','pca_inertia','anosim','rda'];
+
 var outputToCSV = [true,false];
 var saveToDatabase = [false,true];
 var createGraphs = [false,true];
 
-var all = {
+var minimumCount = {
+    "min": 0,
+    "max": 10,
+    "step": 1,
+    "value": 3
+};
+var numberPCAComponents = {
+    "min": 0,
+    "max": 10,
+    "step": 1,
+    "value": 4
+};
+var threshold = {
+    "min": 0,
+    "max": 1,
+    "step": 0.05,
+    "value": 0.5
+};
+var selectTotal = {
+    "min": 1,
+    "max": 100,
+    "step": 1,
+    "value": 25
+};
+var selectPerIteration = {
+    "min": 1,
+    "max": 25,
+    "step": 1,
+    "value": 10
+};
+// var oldSelectTotal = 25;
+
+var allSelections = {
     "conditioningType":conditioningType,
     "metricType":metricType,
     "evaluationType":evaluationType,
@@ -28,8 +55,16 @@ var all = {
     "createGraphs": createGraphs
 };
 
+var allSliders = {
+    "minimumCount": minimumCount,
+    "numberPCAComponents": numberPCAComponents,
+    "threshold": threshold,
+    "selectTotal": selectTotal,
+    "selectPerIteration": selectPerIteration
+};
+
 var commandString = "python pipeline.py -f1 bromeA_all.csv";
-var pressingRun = false;
+// var pressingRun = false;
 var commandResponse = "nothing so far...";
 
 var CurrentVersion = 1;
@@ -67,30 +102,33 @@ $( function() {
 
     function init() {
 
-        for (var element in all) {
-
-            $.each(all[element], function(key, value) {
+        for (var element in allSelections) {
+            $.each(allSelections[element], function(key, value) {
                 $('#'+element)
                     .append($("<option></option>")
                         .attr("value",value)
                         .text(value));
             });
         }
+        for (var e in allSliders) {
+            $.each(allSliders[e], function(key, value) {
+                var temp = $('#'+e);
+                temp.attr(key,value);
+                valueOutput(temp[0]);
+            });
+        }
 
         setCurrentCommand();
 
-        $('input[type="range"]').rangeslider();
-
-        minimumCountValue.change(function () {
-            console.log($(this).val());
+        $(document).on('input', 'input[type="range"]', function(e) {
+            valueOutput(e.target);
+            setCurrentCommand();
         });
 
         $('.fieldChange').change(setCurrentCommand);
 
-
         $('#runButton').click(pressRun);
 
-        // console.log(commandsJSON);
         drawTree(commandsJSON);
     }
 
@@ -106,7 +144,6 @@ $( function() {
                 metric1.hide();
                 break;
         }
-
 
         // put together parameters for sending to the external program
         commandString = "python3 pipeline.py -f1 bromeA_all.csv";
@@ -133,9 +170,17 @@ $( function() {
 
 } );
 
+function valueOutput(element) {
+    var value = element.value;
+    var output = element.parentNode.getElementsByTagName('label')[0] || element.parentNode.parentNode.getElementsByTagName('label')[0];
+    output['innerText'] = output['htmlFor'] + ": " + value;
+}
+
 function addToCommandJSON(str) {
     commandsJSON.versions.forEach(function (item) {
+        console.log(commandsJSON.versions[0].title === str);
         if (item.id === CurrentVersion && str !== item.title) {
+            console.log("yo");
             var t_id = commandsJSON.versions.length + 1;
             var temp = {
                 "id": t_id,
@@ -153,13 +198,21 @@ function updateValues(id) {
     for(var i=0; i < commandsJSON.versions.length; i++) {
         if (commandsJSON.versions[i].id === id) {
             var temp = commandsJSON.versions[i].title.split(" ");
-            // minimumCount = parseInt(temp[temp.indexOf("-min") + 1]);
-            // numberPCAComponents = parseInt(temp[temp.indexOf("-p") + 1]);
+            $('#minimumCount').val(parseInt(temp[temp.indexOf("-min") + 1]));
+            $('#numberPCAComponents').val(parseInt(temp[temp.indexOf("-p") + 1]));
+            $('#threshold').val(parseInt(temp[temp.indexOf("-th") + 1]));
+            $('#selectTotal').val(parseInt(temp[temp.indexOf("-st") + 1]));
+            $('#selectPerIteration').val(parseInt(temp[temp.indexOf("-si") + 1]));
             $('#conditioningType').val(temp[temp.indexOf("-c") + 1]);
             $('#evaluationType').val(temp[temp.indexOf("-e") + 1]);
             $('#metricType').val(temp[temp.indexOf("-m") + 1]).change();
             break;
         }
+    }
+    for (var e in allSliders) {
+        $.each(allSliders[e], function(key, value) {
+            valueOutput($('#'+e)[0]);
+        });
     }
 }
 
@@ -198,11 +251,11 @@ function requestListener () {
     //parts.splice(0,1);
     parts[0] = "OTU           Metric           Abundance";
     commandResponse = parts.join("<br>");
-    if (commandResponse == "") {
+    if (commandResponse === "") {
         commandResponse = "No response from program execution."
     } else {
         // create links for output files
-        if (metricType == "pca_importance") {
+        if (metricType === "pca_importance") {
             centralityType = "None";
         }
         var namebase = "bromeA_all-" + metricType + "-" + centralityType + "-select" +  selectTotal + "by" + selectPerIteration;
