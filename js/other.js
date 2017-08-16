@@ -250,7 +250,7 @@ function requestListener () {
     commandResponse = this.responseText;
     console.log("Response: " + this.responseText);
 
-    var parts = split(commandResponse,",");
+    var parts = commandResponse.split(",");
     //parts.splice(0,1);
     parts[0] = "OTU           Metric           Abundance";
     commandResponse = parts.join("<br>");
