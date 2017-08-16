@@ -33,7 +33,7 @@
     /*display: none;*/
 /*}*/
 
-.upload-section {
+.upload-section, .tree-display {
     background-color: #515151;
     border: 1px solid;
     color: white;

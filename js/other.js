@@ -125,6 +125,14 @@ $( function() {
             setCurrentCommand();
         });
 
+        $('#treeDisplay').click(function () {
+            if ($('#treeDisplay').is(':checked')) {
+                $('.treeContainer').show();
+            } else {
+                $('.treeContainer').hide();
+            }
+        });
+
         $('.fieldChange').change(setCurrentCommand);
 
         $('#runButton').click(pressRun);
