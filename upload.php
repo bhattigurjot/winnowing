@@ -1,5 +1,4 @@
 <?php
-echo "Hello";
 $target_dir = "files/";
 $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
 $uploadOk = 1;
