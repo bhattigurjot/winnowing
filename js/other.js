@@ -178,7 +178,6 @@ function valueOutput(element) {
 
 function addToCommandJSON(str) {
     commandsJSON.versions.forEach(function (item) {
-        console.log(commandsJSON.versions[0].title === str);
         if (item.id === CurrentVersion && str !== item.title) {
             console.log("yo");
             var t_id = commandsJSON.versions.length + 1;
@@ -258,10 +257,10 @@ function requestListener () {
         commandResponse = "No response from program execution."
     } else {
         // create links for output files
-        if (metricType === "pca_importance") {
-            centralityType = "None";
+        if ($('#metricType').val() === "pca_importance") {
+            $('#centralityType').val("None");
         }
-        var namebase = "bromeA_all-" + metricType + "-" + centralityType + "-select" +  selectTotal + "by" + selectPerIteration;
+        var namebase = "bromeA_all-" + $('#metricType').val() + "-" + $('#centralityType').val() + "-select" +  $('#selectTotal').val() + "by" + $('#selectPerIteration').val();
         var filename1 = namebase + ".csv";
         var filename2 = namebase + "-abundances.csv";
     }
