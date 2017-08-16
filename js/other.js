@@ -206,6 +206,9 @@ function updateValues(id) {
             $('#conditioningType').val(temp[temp.indexOf("-c") + 1]);
             $('#evaluationType').val(temp[temp.indexOf("-e") + 1]);
             $('#metricType').val(temp[temp.indexOf("-m") + 1]).change();
+
+            CurrentVersion = id;
+
             break;
         }
     }
