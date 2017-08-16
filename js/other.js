@@ -62,7 +62,9 @@ var allSliders = {
     "selectPerIteration": selectPerIteration
 };
 
-var commandString = "python pipeline.py -f1 bromeA_all.csv";
+var selectedFileName = "input/bromeA_all.csv";
+
+var commandString = "python pipeline.py -f1 " + selectedFileName;
 // var pressingRun = false;
 var commandResponse = "nothing so far...";
 
@@ -72,7 +74,7 @@ var commandsJSON = {
         {
             "id": 1,
             "label": "Node 1",
-            "title": "python3 pipeline.py -f1 bromeA_all.csv -c add_one -min 3 -m pca_importance -p 4 -st 25 -si 10 -e kl_divergence"
+            "title": "python3 pipeline.py -f1 "+ selectedFileName +" -c add_one -min 3 -m pca_importance -p 4 -st 25 -si 10 -e kl_divergence"
         }
     ]
 };
@@ -165,7 +167,7 @@ $( function() {
         }
 
         // put together parameters for sending to the external program
-        commandString = "python3 pipeline.py -f1 bromeA_all.csv";
+        commandString = "python3 pipeline.py -f1 " + selectedFileName;
         commandString = commandString + " -c " + conditioningTypeValue.val();
         commandString = commandString + " -min " + minimumCountValue.val();
         commandString = commandString + " -m " + metricTypeValue.val();
@@ -288,7 +290,7 @@ function requestListener () {
         } else {
             temp = $('#centralityType').val();
         }
-        var namebase = "bromeA_all-" + $('#metricType').val() + "-" + temp + "-select" +  $('#selectTotal').val() + "by" + $('#selectPerIteration').val();
+        var namebase = selectedFileName + "-" + $('#metricType').val() + "-" + temp + "-select" +  $('#selectTotal').val() + "by" + $('#selectPerIteration').val();
         var filename1 = namebase + ".csv";
         var filename2 = namebase + "-abundances.csv";
     }

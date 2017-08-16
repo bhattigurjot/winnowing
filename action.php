@@ -6,6 +6,16 @@
 	$all = implode(',',$output);
 	echo $all;
 
+	if (file_exists("metric_results.csv")) {
+		rename('metric_results.csv','output/metric_results.csv');
+	}
+
+	$glob = glob('input/*-*.csv');
+	foreach ($glob as $f) {
+		$file = basename($f);
+        rename($f,"output/$file");
+	}
+
 	#$c = $_GET['c'];
 	#$min = $_GET['min'];
 	#echo exec ("python3 pipeline.py -f1 bromeA_all.csv -c " + $c + " -min " + $min + "-m pca_importance -p 4 -st 25 -si 10 -e kl_divergence");
