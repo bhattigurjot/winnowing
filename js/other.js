@@ -40,7 +40,6 @@ var selectPerIteration = {
     "step": 1,
     "value": 10
 };
-// var oldSelectTotal = 25;
 
 var allSelections = {
     "conditioningType":conditioningType,
@@ -91,6 +90,7 @@ $( function() {
     var centralityTypeValue = $('#centralityType');
     var thresholdValue = $('#threshold');
     var selectTotalValue = $('#selectTotal');
+    var selectTotalAllValue = $('#selectTotalAll');
     var selectPerIterationValue = $('#selectPerIteration');
     var evaluationTypeValue = $('#evaluationType');
     var metric1 = $('#metric-1');
@@ -129,6 +129,17 @@ $( function() {
 
         $('#runButton').click(pressRun);
 
+        selectTotalAllValue.click(function () {
+           if (selectTotalAllValue.is(':checked')) {
+               selectTotalValue.prop( "disabled", true );
+               selectTotalValue.parent().find('label')[0]['innerHTML'] = 'selectTotal: all';
+           } else {
+               selectTotalValue.prop( "disabled", false );
+               selectTotalValue.parent().find('label')[0]['innerHTML'] = 'selectTotal: ' + selectTotalValue.val();
+           }
+           setCurrentCommand();
+        });
+
         drawTree(commandsJSON);
     }
 
@@ -161,7 +172,13 @@ $( function() {
             commandString = commandString + " -cent " + centralityTypeValue.val();
             commandString = commandString + " -th " + thresholdValue.val();
         }
-        commandString = commandString + " -st " + selectTotalValue.val();
+        var selectTotalCorrectedValue;
+        if (selectTotalAllValue.is(':checked')) {
+            selectTotalCorrectedValue = 'all';
+        } else {
+            selectTotalCorrectedValue = selectTotalValue.val();
+        }
+        commandString = commandString + " -st " + selectTotalCorrectedValue;
         commandString = commandString + " -si " + selectPerIterationValue.val();
         commandString = commandString + " -e " + evaluationTypeValue.val();
 
