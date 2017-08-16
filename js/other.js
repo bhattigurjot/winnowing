@@ -231,7 +231,7 @@ function tryRequest() {
     oReq.addEventListener("load", requestListener);
     var cmdstr = commandString.split(" ").join("^");
     console.log("sending: " + cmdstr);
-    oReq.open("GET", "http://p2irc-demo.usask.ca/winnowing/test-action.php?arg=" + cmdstr);
+    oReq.open("GET", "action.php?arg=" + cmdstr);
     oReq.send();
     console.log("command sent: " + cmdstr);
     var res = document.getElementById("results");
