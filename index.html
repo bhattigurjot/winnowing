@@ -22,8 +22,8 @@
 
     <div class="upload-section">
         <form action="upload.php" method="post" enctype="multipart/form-data">
-            <p>Select text file to upload:</p>
-            <input type="file" name="fileToUpload" id="fileToUpload">
+            <p>Select csv file to upload:</p>
+            <input type="file" name="fileToUpload" id="fileToUpload" accept=".csv" required>
             <input type="submit" value="Upload File" name="submit">
         </form>
     </div>
@@ -141,19 +141,19 @@
             <fieldset>
                 <label for="outputToCSV">outputToCSV</label>
                 <br>
-                <select name="outputToCSV" id="outputToCSV">
+                <select name="outputToCSV" id="outputToCSV" disabled>
                 </select>
             </fieldset>
             <fieldset>
                 <label for="saveToDatabase">saveToDatabase</label>
                 <br>
-                <select name="saveToDatabase" id="saveToDatabase">
+                <select name="saveToDatabase" id="saveToDatabase" disabled>
                 </select>
             </fieldset>
             <fieldset>
                 <label for="createGraphs">createGraphs</label>
                 <br>
-                <select name="createGraphs" id="createGraphs">
+                <select name="createGraphs" id="createGraphs" disabled>
                 </select>
             </fieldset>
         </div>
