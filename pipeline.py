@@ -16,6 +16,10 @@ import csv
 import minepy #pip install minepy
 import pylab
 import time
+#pip install graphviz
+#pip install pydot2
+import graphviz as gv
+
 
 global min_count
 global window_size
@@ -157,14 +161,14 @@ def pca_importance(df, num_pca_components=4, cond_type='hellinger'):
     result = pca.fit(conditioned_df)  # Run the PCA on the conditioned data here
     components = result.components_ # the eigenvectors/components
     eigenvectors = pd.DataFrame(components, columns=[data.columns])
+
     abs_eigens = np.absolute(eigenvectors) #element wise absolute value to get rid of negatives
-    variance = pd.DataFrame(abs_eigens.sum(axis=0), columns=['variance']) # sum up the components to get the amount of variance across all components for each OTU
+    variance = pd.DataFrame({'metric': abs_eigens.sum(axis=0)})  # sum up the components to get the amount of variance across all components for each feature
+    variance['pca1'],variance['pca2'] = eigenvectors.iloc[0], eigenvectors.iloc[1]
 
-    #variance = pd.DataFrame(abs_eigens.var(axis=0), columns=['variance']) # now we need to find the variance for each feature
     #order the features from largest to smallest to return as our sorted dataframe
-    ordered_features = variance.sort_values(by='variance', ascending=0)
+    ordered_features = variance.sort_values(by='metric', ascending=0)
     #print('ordered_features columns', ordered_features.index.values)
-
     return ordered_features
 
 def pca_legendre(df, num_pca_components, cond_type='hellinger'):
@@ -188,7 +192,7 @@ Then calculate betweenness on the graph to get the value.
 '''
 
 #this function computes the correlation matrix necessary to generate the graph
-#any correlation supported by DataFrame.corr can be passed in (‘pearson’, ‘kendall’, ‘spearman’)
+#any correlation supported by DataFrame.corr can be passed in ('pearson', 'kendall', 'spearman')
 #Once MIC is implemented it will be added
 def find_correlation(df, corr_type='spearman'):
     df_r = 0
@@ -274,12 +278,13 @@ def graph_centrality(df, cent_type='betweenness', keep_thresh=0.5, cond_type='ad
         return -1
 
     centrality_df = pd.DataFrame.from_dict(centrality, orient='index')
+    centrality_df.columns = ['metric']
 
     if not centrality_df.empty:
         centrality_df = centrality_df[centrality_df.ix[:,0] > 0]
 
     if not centrality_df.empty:
-        centrality_df.sort_values(0, axis=0, ascending=False, inplace=True)
+        centrality_df.sort_values('metric', axis=0, ascending=False, inplace=True)
 
     '''fig = plt.figure()
     plt.hist(centrality_df, bins=20)
@@ -324,12 +329,6 @@ def selection(func, s_total, s_per_iter, df, *args):
             select_per_iter = int(s_per_iter)
         except:
             print('not a valid select per iteration value')
-
-    # if they're selecting all at once, we only need to loop through once
-    #if (s_total == 'all' and s_per_iter == 'all') or (s_total != 'all' and s_per_iter == 'all'):
-    #    num_loops = 1
-    #else:
-    #    num_loops = math.ceil(select_total/select_per_iter)
 
     # make sure they aren't trying to select more features per iter than total features
     select_per_iter = min(select_per_iter, select_total)
@@ -424,7 +423,7 @@ def pca_inertia_eval(df, num_pca_components, cond_type, smoothing_type):
     ax = fig.add_subplot(111)
     smoothed['Total'].plot(kind='bar', title='Total Variation')
     ax.set_xticklabels([])
-    plt.show()
+    #plt.show()
 
     return important_features
 
@@ -475,8 +474,65 @@ def kl_divergence(A, B, features, select_per_iter, cond_type):
 
     return diverge_vals
 
+def create_pca_plot(features):
+    data = features.copy()
+    plt.scatter(data['pca1'],data['pca2'])
+    plt.xlabel('Principle Component 1')
+    plt.ylabel('Principle Component 2')
+    plt.title('Scatter Plot of Principle Components 1 and 2')
+    plt.tight_layout()
+    plt.savefig("pca_scatter.png")
+    #plt.show()
 
-def main(ab_comp, infile1, infile2, metric, c_type, min_count, total_select, iteration_select, pca_components, smooth_type, window_size, centrality_type, keep_threshold, correlation, weighted, corr_prop, evaluation_type):
+def plot_graph_centrality(features, cond_type, corr_type, corr_dir, keep_thresh, weighted):
+    data = features.copy()
+    # create a graph of the edges/nodes using the same centrality type as used to select the features
+    # this is the top25 file stuff
+
+    conditioned_df = condition(data, cond_type)  # condition data
+    w_corr_df = find_correlation(conditioned_df, corr_type)
+    if corr_dir == 'positive':
+        w_corr_df_b = 1 - w_corr_df.copy()  # only keep strong positive correlations (small positive numbers)
+    elif corr_dir == 'negative':
+        w_corr_df_b = 1 + w_corr_df.copy()  # only keep strong negative correlations (small negative numbers)
+    else:
+        w_corr_df_b = 1 - abs(w_corr_df.copy())  # keep both strong positive and negative correlations
+    w_corr_df_b[
+        (w_corr_df_b >= 1 - keep_thresh)] = 1  # set anything greater than the threshold value to 1 so we can remove it.
+    labels = list(w_corr_df_b.index)
+    temp = abs(w_corr_df_b.copy())
+    temp.insert(0, 'var1', labels)
+
+    if weighted == True:
+        attr = 'weight'
+    else:
+        attr = 'edge'
+
+    df_b = pd.melt(temp, 'var1', var_name='var2', value_name=attr)
+    df_b = df_b.loc[((df_b[attr] <= 1 - keep_thresh) & (df_b[attr] > 0.0)),:]  # take only those edge pairs that made the cut
+    df_g = networkx.from_pandas_dataframe(df_b, 'var1', 'var2', attr)  # takes a list of valid edges
+    networkx.write_graphml(df_g, 'graph_network.graphml')
+    networkx.draw(df_g, node_color='dodgerblue',edge_color='dimgrey', with_labels=True)
+
+    plt.savefig("graph_network.png")
+    #plt.show()
+
+def plot_feature_metric(features):
+    # x-axis is the OTU (feature) in ranked order
+    # y-axis is the metric value
+    data = features.copy()
+    data['metric'].plot(style='.-')
+    plt.xticks(np.arange(0, len(data['metric'])), data.index.values, rotation=45, ha='center')
+    plt.xlabel('Feature Label')
+    plt.ylabel('Metric Value')
+    plt.title('Metric Value Per Feature')
+    plt.tight_layout()
+    plt.savefig("metric_value.png")
+    #plt.show()
+
+
+
+def main(ab_comp, infile1, infile2, metric, c_type, min_count, total_select, iteration_select, pca_components, smooth_type, window_size, centrality_type, keep_threshold, correlation, weighted, corr_prop, evaluation_type, plot_metric, create_graph, plot_pca):
     t_start = time.perf_counter()
 
     infile1_path = infile1
@@ -525,7 +581,7 @@ def main(ab_comp, infile1, infile2, metric, c_type, min_count, total_select, ite
     top25_abundances =  data[top25_names]
     top25_abundances.to_csv(abundance_filename, index=False)
 
-
+    # run the metric selection step to return the important features
     important_features = pd.DataFrame()
     if metric == 'graph_centrality':
         metric = graph_centrality
@@ -542,17 +598,24 @@ def main(ab_comp, infile1, infile2, metric, c_type, min_count, total_select, ite
     runtime = t_end - t_start
     metric_params.append(runtime)
 
-
-
-
     # add the abundance totals to the resulting dataframe and create a list of the important feature names
     important_features['abundances'] = data[important_features.index.values].sum(axis=0) #add abundances to the df
-    important_features.columns = ['metric_result','abundances']
     important_feature_list = list(important_features.index.values)
 
     #print('imp feat list', important_feature_list)
     feature_abundances = data[important_feature_list]
     feature_abundances.to_csv(abundance_filename, index=False)
+
+    if plot_metric:
+        plot_feature_metric(important_features)
+
+    if plot_pca and (metric == pca_importance or metric == pca_abundance):
+        create_pca_plot(important_features)
+
+    if create_graph and metric == graph_centrality:
+        plot_graph_centrality(feature_abundances, c_type, correlation, corr_prop, keep_threshold, weighted)
+
+
 
     #add the metric information to the important features and append to the metric results csv
     feature_row = metric_params + important_feature_list
@@ -583,7 +646,7 @@ if __name__ == "__main__":
     parser.add_argument('--file2', '-f2', help='Second file to user for A/B comparison')
     parser.add_argument('--metric', '-m', help='Metric to use')
     parser.add_argument('--evaluation', '-e', help='Evaluation type to use')
-    parser.add_argument('--min_features', '-min', help='Features with counts below this number will be removed', type= int, default=0)
+    parser.add_argument('--min_features', '-min', help='Features with counts below this number will be removed', type=int, default=0)
     parser.add_argument('--conditioning', '-c', help='Conditioning type to use on the data')
     parser.add_argument('--total_select', '-st', help='Number of features to select in total')
     parser.add_argument('--iteration_select', '-si', help='Number of features to select for each time the metric is called')
@@ -591,12 +654,23 @@ if __name__ == "__main__":
     parser.add_argument('--smooth', '-sm', help='Type of Smoothing to be used to remove noise', type=str, default='sliding_window')
     parser.add_argument('--window_size', '-w', help='If Smoothing type is a sliding window, this is the size of the window', type=int)
     parser.add_argument('--centrality', '-cent', help='If graph_centrality is the metric type, this is the type of Centrality to use')
-    parser.add_argument('--threshold', '-th', help='If graph_centrality is the metric type, this is the threshold to use to remove weak edges', type=float, default=.5)
+    parser.add_argument('--threshold', '-th', help='If graph_centrality is the metric type, this is the threshold to use to remove weak edges', type=float, default=0.5)
     parser.add_argument('--correlation', '-cor', help='If graph_centrality is the metric type, this is the type of correlation to use to build the graph')
     parser.add_argument('--weighted', '-wt', action='store_true', default=False,
                         help='If graph_centrality is the metric type, this specifies if weighted edges should be used to create the graph')
     parser.add_argument('--correlation_property', '-cp',
                         help='If graph centrality is the metric, this specifies if positive, negative, or both types of correlation should be used.', default='both')
+    parser.add_argument('--plot_metric', '-pm',
+                        help='Including this parameter will create a line plot of the metric values for the selected features',
+                        action='store_true', default=False)
+    parser.add_argument('--create_graph', '-cg',
+                        help='If graph centrality is the metric, including this parameter will create a graph image of '
+                             'the selected features (using the same correlation type used to select the features).',
+                        action='store_true', default=False)
+    parser.add_argument('--plot_pca', '-pp',
+                        help='If PCA is the metric, including this parameter will create a scatter plot image of '
+                             'the first two principle components',
+                        action='store_true', default=False)
 
     args = parser.parse_args()
     ab = args.ab_comp
@@ -618,5 +692,10 @@ if __name__ == "__main__":
     correlation_property = args.correlation_property
     metric = args.metric
     evaluation = args.evaluation
+    plot_metric = args.plot_metric
+    create_graph = args.create_graph
+    plot_pca = args.plot_pca
 
-    main(ab, file1, file2, metric, conditioning, min_features, total_select, iteration_select, pca_components, smooth, window_size, centrality_type, keep_threshold, correlation,  weighted, correlation_property, evaluation)
+
+    main(ab, file1, file2, metric, conditioning, min_features, total_select, iteration_select, pca_components, smooth, window_size, centrality_type, keep_threshold, correlation,  weighted, correlation_property, evaluation, plot_metric, create_graph, plot_pca)
+
