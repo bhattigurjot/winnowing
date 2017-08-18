@@ -62,9 +62,9 @@ var allSliders = {
     "selectPerIteration": selectPerIteration
 };
 
-var selectedFileName = "input/bromeA_all.csv";
+var selectedFileName = "bromeA_all.csv";
 
-var commandString = "python pipeline.py -f1 " + selectedFileName;
+var commandString = "python pipeline.py -f1 input/" + selectedFileName;
 // var pressingRun = false;
 var commandResponse = "nothing so far...";
 
@@ -74,7 +74,7 @@ var commandsJSON = {
         {
             "id": 1,
             "label": "Node 1",
-            "title": "python3 pipeline.py -f1 "+ selectedFileName +" -c add_one -min 3 -m pca_importance -p 4 -st 25 -si 10 -e kl_divergence"
+            "title": "python3 pipeline.py -f1 input/"+ selectedFileName +" -c add_one -min 3 -m pca_importance -p 4 -st 25 -si 10 -e kl_divergence"
         }
     ]
 };
@@ -103,6 +103,15 @@ $( function() {
     init();
 
     function init() {
+
+        $.ajax({
+            url: 'readFiles.php',
+            method: 'GET',
+            dataType: 'json',
+            success : function (data) {
+                updateInputFileList(data);
+            }
+        });
 
         for (var element in allSelections) {
             $.each(allSelections[element], function(key, value) {
@@ -153,6 +162,17 @@ $( function() {
         drawTree(commandsJSON);
     }
 
+    function updateInputFileList(data) {
+        var elem = $('#inputFile');
+        elem.empty();
+        for (var d in data) {
+            elem.append($("<option></option>")
+                .attr("value",data[d])
+                .text(data[d]));
+        }
+        setCurrentCommand();
+    }
+
     function setCurrentCommand() {
         switch(metricTypeValue.val()) {
             case 'pca_importance':
@@ -166,8 +186,10 @@ $( function() {
                 break;
         }
 
+        selectedFileName = $('#inputFile').val() || "bromeA_all.csv";
+
         // put together parameters for sending to the external program
-        commandString = "python3 pipeline.py -f1 " + selectedFileName;
+        commandString = "python3 pipeline.py -f1 input/" + selectedFileName;
         commandString = commandString + " -c " + conditioningTypeValue.val();
         commandString = commandString + " -min " + minimumCountValue.val();
         commandString = commandString + " -m " + metricTypeValue.val();
@@ -197,6 +219,7 @@ $( function() {
 
 } );
 
+
 function valueOutput(element) {
     var value = element.value;
     var output = element.parentNode.getElementsByTagName('label')[0] || element.parentNode.parentNode.getElementsByTagName('label')[0];
@@ -206,7 +229,6 @@ function valueOutput(element) {
 function addToCommandJSON(str) {
     commandsJSON.versions.forEach(function (item) {
         if (item.id === CurrentVersion && str !== item.title) {
-            console.log("yo");
             var t_id = commandsJSON.versions.length + 1;
             var temp = {
                 "id": t_id,
@@ -290,14 +312,14 @@ function requestListener () {
         } else {
             temp = $('#centralityType').val();
         }
-        var namebase = selectedFileName + "-" + $('#metricType').val() + "-" + temp + "-select" +  $('#selectTotal').val() + "by" + $('#selectPerIteration').val();
+        var namebase = selectedFileName.substring(0, selectedFileName.length - 4) + "-" + $('#metricType').val() + "-" + temp + "-select" +  $('#selectTotal').val() + "by" + $('#selectPerIteration').val();
         var filename1 = namebase + ".csv";
         var filename2 = namebase + "-abundances.csv";
     }
     commandResponse = "<pre>" + commandResponse + "</pre>";
     var res = document.getElementById("results");
-    res.innerHTML = res.innerHTML + "<a href='" + filename1 + "'>" + filename1 + "</a>" + "<p>";
-    res.innerHTML = res.innerHTML + "<a href='" + filename2 + "'>" + filename2 + "</a>" + "<p>";
+    res.innerHTML = res.innerHTML + "<a href='output/" + filename1 + "'>" + filename1 + "</a>" + "<p>";
+    res.innerHTML = res.innerHTML + "<a href='output/" + filename2 + "'>" + filename2 + "</a>" + "<p>";
     res.innerHTML = res.innerHTML + commandResponse + "<p>";
 
 

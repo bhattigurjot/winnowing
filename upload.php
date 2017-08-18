@@ -1,5 +1,5 @@
 <?php
-$target_dir = "files/";
+$target_dir = "input/";
 $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
 $uploadOk = 1;
 if(isset($_POST["submit"])) {
