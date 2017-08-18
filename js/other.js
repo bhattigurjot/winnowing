@@ -166,9 +166,11 @@ $( function() {
         var elem = $('#inputFile');
         elem.empty();
         for (var d in data) {
-            elem.append($("<option></option>")
-                .attr("value",data[d])
-                .text(data[d]));
+            if (data.hasOwnProperty(d)) {
+                elem.append($("<option></option>")
+                    .attr("value",data[d])
+                    .text(data[d]));
+            }
         }
         setCurrentCommand();
     }
