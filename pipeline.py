@@ -259,7 +259,7 @@ def graph_centrality(df, cent_type='betweenness', keep_thresh=0.5, cond_type='ad
 
     #print('adjacency matrix', networkx.to_pandas_dataframe(df_g))
     am = networkx.to_pandas_dataframe(df_g)
-    #am.to_csv('adj_matrix.csv')
+    am.to_csv('adj_matrix.csv')
 
     if cent_type == 'betweenness':
         centrality = networkx.betweenness_centrality(df_g)
@@ -274,6 +274,7 @@ def graph_centrality(df, cent_type='betweenness', keep_thresh=0.5, cond_type='ad
         return -1
 
     centrality_df = pd.DataFrame.from_dict(centrality, orient='index')
+
     if not centrality_df.empty:
         centrality_df = centrality_df[centrality_df.ix[:,0] > 0]
 
@@ -291,7 +292,7 @@ def graph_centrality(df, cent_type='betweenness', keep_thresh=0.5, cond_type='ad
 
     return centrality_df
 
-def selection(func, select_total, select_per_iter, df, *args):
+def selection(func, s_total, s_per_iter, df, *args):
     '''
     Function selection: does N loops of the metric before going to the evaluation step
     :param type: are we selecting features to remove or to retain
@@ -306,13 +307,38 @@ def selection(func, select_total, select_per_iter, df, *args):
     # when we get back this dataframe, we need to select a specified number of features (select_per_iter)
     # until we select the total number of features desired (select_total)
     selected = 0
+
+    if s_total == 'all':
+        select_total = len(data.columns)
+    else:
+        try:
+            select_total = int(s_total)
+        except:
+            print('not a valid select total value')
+            sys.exit(1)
+
+    if s_per_iter == 'all':
+        select_per_iter = len(data.columns)
+    else:
+        try:
+            select_per_iter = int(s_per_iter)
+        except:
+            print('not a valid select per iteration value')
+
+    # if they're selecting all at once, we only need to loop through once
+    #if (s_total == 'all' and s_per_iter == 'all') or (s_total != 'all' and s_per_iter == 'all'):
+    #    num_loops = 1
+    #else:
+    #    num_loops = math.ceil(select_total/select_per_iter)
+
+    # make sure they aren't trying to select more features per iter than total features
+    select_per_iter = min(select_per_iter, select_total)
     select = select_per_iter
     for i in range(0, math.ceil(select_total/select_per_iter)):
         #call the metric with the current data
         sorted_df = func(data, *args)
-        #print('sorted df', sorted_df)
         if not sorted_df.empty:
-            #print('sorted_df', sorted_df.head())
+            #print('sorted_df', sorted_df.head(), sorted_df.shape)
             if ((i+1)*select_per_iter > select_total):
                 select = select_total % selected
             #take the top n features returned by the metric
@@ -445,7 +471,7 @@ def kl_divergence(A, B, features, select_per_iter, cond_type):
         if kl_diverge > 1e50:
             kl_diverge = 1e50
         diverge_vals.append(kl_diverge)  # determine if the remaining histograms are more alike after elimination
-        #print('kl_diverge', kl_diverge)
+        print('kl_diverge', kl_diverge)
 
     return diverge_vals
 
@@ -526,7 +552,6 @@ def main(ab_comp, infile1, infile2, metric, c_type, min_count, total_select, ite
 
     #print('imp feat list', important_feature_list)
     feature_abundances = data[important_feature_list]
-    #print('feature abundances', feature_abundances)
     feature_abundances.to_csv(abundance_filename, index=False)
 
     #add the metric information to the important features and append to the metric results csv
@@ -560,8 +585,8 @@ if __name__ == "__main__":
     parser.add_argument('--evaluation', '-e', help='Evaluation type to use')
     parser.add_argument('--min_features', '-min', help='Features with counts below this number will be removed', type= int, default=0)
     parser.add_argument('--conditioning', '-c', help='Conditioning type to use on the data')
-    parser.add_argument('--total_select', '-st', help='Number of features to select in total', type=int)
-    parser.add_argument('--iteration_select', '-si', help='Number of features to select for each time the metric is called', type=int)
+    parser.add_argument('--total_select', '-st', help='Number of features to select in total')
+    parser.add_argument('--iteration_select', '-si', help='Number of features to select for each time the metric is called')
     parser.add_argument('--pca_components', '-p', help='Number of pca components to find', type=int, default=4)
     parser.add_argument('--smooth', '-sm', help='Type of Smoothing to be used to remove noise', type=str, default='sliding_window')
     parser.add_argument('--window_size', '-w', help='If Smoothing type is a sliding window, this is the size of the window', type=int)
