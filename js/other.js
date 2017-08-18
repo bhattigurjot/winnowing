@@ -104,14 +104,7 @@ $( function() {
 
     function init() {
 
-        $.ajax({
-            url: 'readFiles.php',
-            method: 'GET',
-            dataType: 'json',
-            success : function (data) {
-                updateInputFileList(data);
-            }
-        });
+        readInputFiles();
 
         for (var element in allSelections) {
             $.each(allSelections[element], function(key, value) {
@@ -160,6 +153,35 @@ $( function() {
         });
 
         drawTree(commandsJSON);
+    }
+
+    $('#uploadFileForm').submit(function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: "upload.php",
+            type: "POST",
+            data: new FormData(this),
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function (data)
+            {
+                alert(data);
+                readInputFiles();
+                $('#uploadFileForm')[0].reset();
+            }
+        });
+    });
+
+    function readInputFiles() {
+        $.ajax({
+            url: 'readFiles.php',
+            method: 'GET',
+            dataType: 'json',
+            success : function (data) {
+                updateInputFileList(data);
+            }
+        });
     }
 
     function updateInputFileList(data) {
