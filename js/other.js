@@ -94,6 +94,7 @@ $( function() {
     var selectTotalValue = $('#selectTotal');
     var selectTotalAllValue = $('#selectTotalAll');
     var selectPerIterationValue = $('#selectPerIteration');
+    var selectPerIterationAllValue = $('#selectPerIterationAll');
     var evaluationTypeValue = $('#evaluationType');
     var metric1 = $('#metric-1');
     var metric2 = $('#metric-2');
@@ -150,6 +151,17 @@ $( function() {
                selectTotalValue.parent().find('label')[0]['innerHTML'] = 'selectTotal: ' + selectTotalValue.val();
            }
            setCurrentCommand();
+        });
+
+        selectPerIterationAllValue.click(function () {
+            if (selectPerIterationAllValue.is(':checked')) {
+                selectPerIterationValue.prop( "disabled", true );
+                selectPerIterationValue.parent().find('label')[0]['innerHTML'] = 'selectPerIteration: all';
+            } else {
+                selectPerIterationValue.prop( "disabled", false );
+                selectPerIterationValue.parent().find('label')[0]['innerHTML'] = 'selectPerIteration: ' + selectPerIterationValue.val();
+            }
+            setCurrentCommand();
         });
 
         drawTree(commandsJSON);
@@ -229,13 +241,19 @@ $( function() {
             commandString = commandString + " -th " + thresholdValue.val();
         }
         var selectTotalCorrectedValue;
+        var selectPerIterationCorrectedValue;
         if (selectTotalAllValue.is(':checked')) {
             selectTotalCorrectedValue = 'all';
         } else {
             selectTotalCorrectedValue = selectTotalValue.val();
         }
+        if (selectPerIterationAllValue.is(':checked')) {
+            selectPerIterationCorrectedValue = 'all';
+        } else {
+            selectPerIterationCorrectedValue = selectPerIterationValue.val();
+        }
         commandString = commandString + " -st " + selectTotalCorrectedValue;
-        commandString = commandString + " -si " + selectPerIterationValue.val();
+        commandString = commandString + " -si " + selectPerIterationCorrectedValue;
         commandString = commandString + " -e " + evaluationTypeValue.val();
 
         currentCommand.html(commandString);
