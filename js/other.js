@@ -79,6 +79,9 @@ var commandsJSON = {
     ]
 };
 
+var selectTotalCorrectedValue;
+var selectPerIterationCorrectedValue;
+
 $( function() {
     // Get elements via jquery
     var currentCommand = $('#currentCommand');
@@ -240,8 +243,7 @@ $( function() {
             commandString = commandString + " -cent " + centralityTypeValue.val();
             commandString = commandString + " -th " + thresholdValue.val();
         }
-        var selectTotalCorrectedValue;
-        var selectPerIterationCorrectedValue;
+
         if (selectTotalAllValue.is(':checked')) {
             selectTotalCorrectedValue = 'all';
         } else {
@@ -344,6 +346,8 @@ function requestListener () {
     //parts.splice(0,1);
     parts[0] = "OTU           Metric           Abundance";
     commandResponse = parts.join("<br>");
+    var filename1;
+    var filename2;
     if (commandResponse === "") {
         commandResponse = "No response from program execution."
     } else {
@@ -354,9 +358,9 @@ function requestListener () {
         } else {
             temp = $('#centralityType').val();
         }
-        var namebase = selectedFileName.substring(0, selectedFileName.length - 4) + "-" + $('#metricType').val() + "-" + temp + "-select" +  $('#selectTotal').val() + "by" + $('#selectPerIteration').val();
-        var filename1 = namebase + ".csv";
-        var filename2 = namebase + "-abundances.csv";
+        var namebase = selectedFileName.substring(0, selectedFileName.length - 4) + "-" + $('#metricType').val() + "-" + temp + "-select" +  selectTotalCorrectedValue + "by" + selectPerIterationCorrectedValue;
+        filename1 = namebase + ".csv";
+        filename2 = namebase + "-abundances.csv";
     }
     commandResponse = "<pre>" + commandResponse + "</pre>";
     var res = document.getElementById("results");
