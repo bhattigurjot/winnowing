@@ -366,6 +366,7 @@ function requestListener () {
     var res = document.getElementById("results");
     res.innerHTML = res.innerHTML + "<a href='output/" + filename1 + "'>" + filename1 + "</a>" + "<p>";
     res.innerHTML = res.innerHTML + "<a href='output/" + filename2 + "'>" + filename2 + "</a>" + "<p>";
+    res.innerHTML = res.innerHTML + "<a href='output/metric_results.csv'>metric_results.csv</a>" + "<p>";
     res.innerHTML = res.innerHTML + commandResponse + "<p>";
 
 
