@@ -2,7 +2,6 @@
 import sys
 import argparse
 import numpy as np
-import matplotlib
 #import skbio as sb  # Use this for ANOSIM
 import pandas as pd  # Use this for working with dataframes
 import os
@@ -14,12 +13,7 @@ import matplotlib.pyplot as plt  # Use this for plotting
 import math
 import csv
 import minepy #pip install minepy
-import pylab
 import time
-#pip install graphviz
-#pip install pydot2
-import graphviz as gv
-
 
 global min_count
 global window_size
@@ -41,7 +35,7 @@ def add_one_smoothing(df):
     :return: @type pandas dataframe: The smoothed data
     '''
     temp = df.copy() + 1
-    temp = temp / df.sum()
+    temp = temp / temp.sum()
     return temp
 
 def hellinger(df):
@@ -64,6 +58,7 @@ def condition(df, cond_type):
     :return: @type pandas dataframe - The conditioned dataframe.
     '''
     temp = df.copy()
+    temp = temp.loc[(temp != 0).any(axis=1)]
     if cond_type == 'add_one':
         conditioned_data = add_one_smoothing(temp)
     elif cond_type == 'hellinger':
@@ -156,8 +151,8 @@ def pca_importance(df, num_pca_components=4, cond_type='hellinger'):
 
     pca = PCA(n_components=num_pca_components)  # Run a PCA with n components
     data = df.copy()  # copy the data into a dataframe to manipulate
-
     conditioned_df = condition(data, cond_type)  # condition data
+
     result = pca.fit(conditioned_df)  # Run the PCA on the conditioned data here
     components = result.components_ # the eigenvectors/components
     eigenvectors = pd.DataFrame(components, columns=[data.columns])
