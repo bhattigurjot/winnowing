@@ -8,6 +8,8 @@ import os
 import networkx
 import scipy.stats as stats
 from sklearn.decomposition import PCA  # Use for PCA
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt  # Use this for plotting
 #from skbio.stats.distance import anosim
 import math
