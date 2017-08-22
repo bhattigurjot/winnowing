@@ -99,6 +99,7 @@ $( function() {
     var selectPerIterationValue = $('#selectPerIteration');
     var selectPerIterationAllValue = $('#selectPerIterationAll');
     var evaluationTypeValue = $('#evaluationType');
+    var createGraphsValue = $('#createGraphs');
     var metric1 = $('#metric-1');
     var metric2 = $('#metric-2');
 
@@ -258,6 +259,13 @@ $( function() {
         commandString = commandString + " -si " + selectPerIterationCorrectedValue;
         commandString = commandString + " -e " + evaluationTypeValue.val();
 
+        if (createGraphsValue.val() === "true") {
+            commandString = commandString + " -pp -pm";
+            if (metricTypeValue.val() === "graph_centrality") {
+                commandString = commandString + " -cg ";
+            }
+        }
+
         currentCommand.html(commandString);
     }
 
@@ -312,21 +320,10 @@ function updateValues(id) {
 }
 
 function pressRun() {
-    tryRequest();
-    addToCommandJSON(commandString);
-    drawTree(commandsJSON);
-}
-
-function tryRequest() {
-    // cursor(WAIT);
-    var oReq = new XMLHttpRequest();
-    oReq.addEventListener("load", requestListener);
     var cmdstr = commandString.split(" ").join("^");
     console.log("sending: " + cmdstr);
-    oReq.open("GET", "action.php?arg=" + cmdstr);
-    oReq.send();
-    console.log("command sent: " + cmdstr);
-    var res = document.getElementById("results");
+
+    var res = $("#results");
     var currentdate = new Date();
     var datetime = "<p>Run date: " + currentdate.getDate() + "/"
         + (currentdate.getMonth()+1)  + "/"
@@ -334,42 +331,77 @@ function tryRequest() {
         + currentdate.getHours() + ":"
         + currentdate.getMinutes() + ":"
         + currentdate.getSeconds();
-    res.innerHTML = res.innerHTML + datetime + "<br>";
-    res.innerHTML = res.innerHTML + commandString+"<p>";
+    res.append(datetime + "<br>");
+    res.append(commandString +"<br>");
+
+    addToCommandJSON(commandString);
+    drawTree(commandsJSON);
+
+    $.ajax({
+        url: 'action.php',
+        type: 'get',
+        data: {
+            arg: cmdstr
+        },
+        success: function(response) {
+            requestListener(response);
+        },
+
+        error: function () {
+            console.log('got error');
+        }
+    });
+    $('body').css('cursor', 'progress');
 }
 
-function requestListener () {
-    commandResponse = this.responseText;
-    console.log("Response: " + this.responseText);
+function requestListener (response) {
+    commandResponse = response;
+
+    var filename1;
+    var filename2;
+    var metricTypeValue = $('#metricType').val();
 
     var parts = commandResponse.split(",");
     //parts.splice(0,1);
     parts[0] = "OTU           Metric           Abundance";
     commandResponse = parts.join("<br>");
-    var filename1;
-    var filename2;
+
     if (commandResponse === "") {
         commandResponse = "No response from program execution."
     } else {
         // create links for output files
         var temp = "";
-        if ($('#metricType').val() === "pca_importance") {
+        if (metricTypeValue === "pca_importance") {
             temp = "None";
         } else {
             temp = $('#centralityType').val();
         }
-        var namebase = selectedFileName.substring(0, selectedFileName.length - 4) + "-" + $('#metricType').val() + "-" + temp + "-select" +  selectTotalCorrectedValue + "by" + selectPerIterationCorrectedValue;
+        var namebase = selectedFileName.substring(0, selectedFileName.length - 4) + "-" + metricTypeValue + "-" + temp + "-select" +  selectTotalCorrectedValue + "by" + selectPerIterationCorrectedValue;
         filename1 = namebase + ".csv";
         filename2 = namebase + "-abundances.csv";
     }
     commandResponse = "<pre>" + commandResponse + "</pre>";
-    var res = document.getElementById("results");
-    res.innerHTML = res.innerHTML + "<a href='output/" + filename1 + "'>" + filename1 + "</a>" + "<p>";
-    res.innerHTML = res.innerHTML + "<a href='output/" + filename2 + "'>" + filename2 + "</a>" + "<p>";
-    res.innerHTML = res.innerHTML + "<a href='output/metric_results.csv'>metric_results.csv</a>" + "<p>";
-    res.innerHTML = res.innerHTML + commandResponse + "<p>";
 
+    var res = $("#results");
+    res.append("<h4>Result files:</h4>");
+    res.append("<p> <a href='output/" + filename1 + "' target='_blank'>" + filename1 + "</a> </p>");
+    res.append("<p> <a href='output/" + filename2 + "' target='_blank'>" + filename2 + "</a> </p>");
+    res.append("<p> <a href='output/metric_results.csv' target='_blank'>metric_results.csv</a> </p>");
+    if (metricTypeValue === "graph_centrality") {
+        res.append("<p> <a href='output/adj_matrix.csv' target='_blank'>adj_matrix.csv</a> </p>");
+        res.append("<p> <a href='output/graph.graphml' target='_blank'>graph.graphml</a> </p>");
+    }
+    if ($('#createGraphs').val() === "true") {
+        res.append("<h4>Graphs:</h4>");
+        res.append("<p> <a href='output/metric_value.png' target='_blank'>metric_value.png</a> </p>");
+        res.append("<p> <a href='output/pca_scatter.png' target='_blank'>pca_scatter.png</a> </p>");
+        if (metricTypeValue === "graph_centrality") {
+            commandString = commandString + " -cg ";
+            res.append("<p> <a href='output/graph_network.graphml' target='_blank'>graph_network.graphml</a> </p>");
+            res.append("<p> <a href='output/graph_network.png' target='_blank'>graph_network.png</a> </p>");
+        }
+    }
 
-    //console.log("response is: " + commandResponse);
-    // cursor(ARROW);
+    res.append(commandResponse);
+    $('body').css('cursor', 'auto');
 }
