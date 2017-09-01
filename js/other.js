@@ -198,7 +198,47 @@ $( function() {
                 updateInputFileList(data);
             }
         });
+        $.ajax({
+            url: 'treeStructure.php',
+            method: 'GET',
+            dataType: 'json',
+            data: {
+              read: 'read'
+            },
+            async: false,
+            success : function (data) {
+                updateJSON(data);
+            }
+        });
     }
+
+    function updateJSON(data) {
+        commandsJSON = data;
+        // console.log(commandsJSON);
+        setCurrentCommand();
+        drawTree(commandsJSON);
+    }
+
+    $(document).keydown (function(e) {
+        if(e.keyCode === 67 && e.ctrlKey && e.shiftKey && e.altKey) {
+            e.preventDefault();
+            console.log("reset key pressed");
+            $.ajax({
+                url: 'treeStructure.php',
+                method: 'GET',
+                dataType: 'json',
+                data: {
+                    reset: 'reset'
+                },
+                async: false,
+                success : function (data) {
+                    updateValues(1);
+                    updateJSON(data);
+                    console.log(data);
+                }
+            });
+        }
+    });
 
     function updateInputFileList(data) {
         var elem = $('#inputFile');
@@ -335,13 +375,14 @@ function pressRun() {
     res.append(commandString +"<br>");
 
     addToCommandJSON(commandString);
-    drawTree(commandsJSON);
+    //drawTree(commandsJSON);
 
     $.ajax({
         url: 'action.php',
         type: 'get',
         data: {
-            arg: cmdstr
+            arg: cmdstr,
+            val: JSON.stringify(commandsJSON)
         },
         success: function(response) {
             requestListener(response);
@@ -369,6 +410,10 @@ function requestListener (response) {
     if (commandResponse === "") {
         commandResponse = "No response from program execution."
     } else {
+        // draw tree
+        addToCommandJSON(commandString);
+        drawTree(commandsJSON);
+
         // create links for output files
         var temp = "";
         if (metricTypeValue === "pca_importance") {

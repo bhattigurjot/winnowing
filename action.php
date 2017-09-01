@@ -20,6 +20,13 @@
             rename($f,"output/$file");
         }
 	}
+	if (isset($_GET['val'])) {
+        $myFile = "input/tree.json";
+        $fh = fopen($myFile, 'w') or die("can't open file");
+        $stringData = $_GET["val"];
+        fwrite($fh, $stringData);
+        fclose($fh);
+    }
 
 
 ?>

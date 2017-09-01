@@ -1,0 +1,1 @@
+{"versions":[{"id":1,"label":"Node 1","title":"python3 pipeline.py -f1 input\/bromeA_all.csv -c add_one -min 3 -m pca_importance -p 4 -st 25 -si 10 -e kl_divergence"}]}
