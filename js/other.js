@@ -214,7 +214,7 @@ $( function() {
 
     function updateJSON(data) {
         commandsJSON = data;
-        // console.log(commandsJSON);
+        updateValues(commandsJSON.versions.length);
         setCurrentCommand();
         drawTree(commandsJSON);
     }
@@ -232,7 +232,6 @@ $( function() {
                 },
                 async: false,
                 success : function (data) {
-                    updateValues(1);
                     updateJSON(data);
                     console.log(data);
                 }
