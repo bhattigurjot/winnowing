@@ -30,13 +30,13 @@ var threshold = {
 };
 var selectTotal = {
     "min": 1,
-    "max": 100,
+    "max": 8065,
     "step": 1,
     "value": 25
 };
 var selectPerIteration = {
     "min": 1,
-    "max": 25,
+    "max": 8065,
     "step": 1,
     "value": 10
 };
