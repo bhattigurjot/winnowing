@@ -239,6 +239,10 @@ input[type=range]:focus::-ms-fill-upper {
     background: #3071A9;
 }
 
+.textbox-number {
+    width: 20%;
+}
+
 /* Tree */
 .treeContainer {
     z-index: 10;

@@ -95,6 +95,8 @@ $( function() {
     var centralityTypeValue = $('#centralityType');
     var thresholdValue = $('#threshold');
     var selectTotalValue = $('#selectTotal');
+    var stText = $('#st-text');
+    var siText = $('#si-text');
     var selectTotalAllValue = $('#selectTotalAll');
     var selectPerIterationValue = $('#selectPerIteration');
     var selectPerIterationAllValue = $('#selectPerIterationAll');
@@ -134,6 +136,14 @@ $( function() {
             setCurrentCommand();
         });
 
+        $(document).on('input', 'input[type="number"]', function(e) {
+            if (e.target.id === 'st-text'){
+                selectTotalValue.val(parseInt(e.target.value));
+            } else if (e.target.id === 'si-text'){
+                selectPerIterationValue.val(parseInt(e.target.value));
+            }
+        });
+
         $('#treeDisplay').click(function () {
             if ($('#treeDisplay').is(':checked')) {
                 $('.treeContainer').show();
@@ -150,9 +160,13 @@ $( function() {
            if (selectTotalAllValue.is(':checked')) {
                selectTotalValue.prop( "disabled", true );
                selectTotalValue.parent().find('label')[0]['innerHTML'] = 'selectTotal: all';
+               stText.prop( "disabled", true);
            } else {
                selectTotalValue.prop( "disabled", false );
-               selectTotalValue.parent().find('label')[0]['innerHTML'] = 'selectTotal: ' + selectTotalValue.val();
+               //selectTotalValue.parent().find('label')[0]['innerHTML'] = 'selectTotal: ' + selectTotalValue.val();
+               selectTotalValue.parent().find('label')[0]['innerHTML'] = 'selectTotal: ';
+               stText.val(parseInt(selectTotalValue.val()));
+               stText.prop( "disabled", false);
            }
            setCurrentCommand();
         });
@@ -161,9 +175,13 @@ $( function() {
             if (selectPerIterationAllValue.is(':checked')) {
                 selectPerIterationValue.prop( "disabled", true );
                 selectPerIterationValue.parent().find('label')[0]['innerHTML'] = 'selectPerIteration: all';
+                siText.prop( "disabled", true);
             } else {
                 selectPerIterationValue.prop( "disabled", false );
-                selectPerIterationValue.parent().find('label')[0]['innerHTML'] = 'selectPerIteration: ' + selectPerIterationValue.val();
+                //selectPerIterationValue.parent().find('label')[0]['innerHTML'] = 'selectPerIteration: ' + selectPerIterationValue.val();
+                selectPerIterationValue.parent().find('label')[0]['innerHTML'] = 'selectPerIteration: ';
+                siText.val(parseInt(selectPerIterationValue.val()));
+                siText.prop( "disabled", false);
             }
             setCurrentCommand();
         });
@@ -313,8 +331,12 @@ $( function() {
 
 function valueOutput(element) {
     var value = element.value;
-    var output = element.parentNode.getElementsByTagName('label')[0] || element.parentNode.parentNode.getElementsByTagName('label')[0];
-    output['innerText'] = output['htmlFor'] + ": " + value;
+    //var output = element.parentNode.getElementsByTagName('label')[0] || element.parentNode.parentNode.getElementsByTagName('label')[0];
+    //output['innerText'] = output['htmlFor'] + ": " + value;
+    var output = element.parentNode.getElementsByTagName('input')[0] || element.parentNode.parentNode.getElementsByTagName('input')[0];
+    if (output.type === 'number') {
+        output.value = parseInt(value);
+    }
 }
 
 function addToCommandJSON(str) {
