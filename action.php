@@ -1,8 +1,8 @@
 <?php
 	set_time_limit(0);
 
-	if (isset($_GET['arg'])) {
-        $cmdstr = $_GET['arg'];
+	if (isset($_POST['arg'])) {
+        $cmdstr = $_POST['arg'];
         $cmd = str_replace("^", " ", $cmdstr);
         exec($cmd, $output, $rv);
         $all = implode(',', $output);
@@ -20,10 +20,10 @@
             rename($f,"output/$file");
         }
 	}
-	if (isset($_GET['val'])) {
+	if (isset($_POST['val'])) {
         $myFile = "input/tree.json";
         $fh = fopen($myFile, 'w') or die("can't open file");
-        $stringData = $_GET["val"];
+        $stringData = $_POST["val"];
         fwrite($fh, $stringData);
         fclose($fh);
     }

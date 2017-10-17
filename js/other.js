@@ -400,7 +400,7 @@ function pressRun() {
 
     $.ajax({
         url: 'action.php',
-        type: 'get',
+        type: 'POST',
         data: {
             arg: cmdstr,
             val: JSON.stringify(commandsJSON)
