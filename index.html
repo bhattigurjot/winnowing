@@ -14,7 +14,7 @@
 </head>
 <body>
 <div id="pipeline">
-    <h1>Winnowing Pipeline Project</h1>
+    <h2>Winnowing Pipeline Project</h2>
     <div class="tree-display">
         <input id="treeDisplay" type="checkbox" checked="true">
         <label for="treeDisplay">Version Tree Display</label>
@@ -22,10 +22,13 @@
 
     <div class="upload-section">
         <form id="uploadFileForm" action="upload.php" method="post" enctype="multipart/form-data">
-            <p>Select csv file to upload:</p>
+            Select csv file to upload:
+            <!--<p>Select csv file to upload:</p>-->
             <input type="file" name="fileToUpload" id="fileToUpload" accept=".csv" required>
             <input type="submit" value="Upload File" name="submit">
         </form>
+        Select criteria/parameters file to upload:
+        <input type="file" name="fileToUpload" id="fileToUpload2" accept=".json">
     </div>
 
     <div class="box" style="left: 450px; top: 80px;">

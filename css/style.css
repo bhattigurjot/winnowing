@@ -24,7 +24,7 @@
     font-size: small;
 }
 
-#pipeline > h1 {
+#pipeline > h2 {
     color: white;
     padding: 15px;
     padding-bottom: 0px;
@@ -44,7 +44,7 @@
     padding: 0px 10px 10px 10px;
 }
 
-.upload-section > form > input {
+.upload-section > form > input, #fileToUpload2 {
     background-color:#44c767;
     -moz-border-radius:28px;
     -webkit-border-radius:28px;

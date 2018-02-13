@@ -207,6 +207,45 @@ $( function() {
         });
     });
 
+    // Read parameters file
+    $('#fileToUpload2').change( function(event) {
+        var reader = new FileReader();
+
+        reader.onload = function(event) {
+            var jsonObj = JSON.parse(event.target.result);
+            alert(jsonObj);
+            setParameters(jsonObj);
+        };
+
+        reader.readAsText(event.target.files[0]);
+    });
+
+    function setParameters(jsonObj) {
+        $('#conditioningType').val(jsonObj.conditioningType);
+        $('#minimumCount').val(parseInt(jsonObj.minimumCount));
+        $('#metricType').val(jsonObj.metricType).change();
+        if (jsonObj.metricType == "graph_centrality") {
+            $('#correlationType').val(jsonObj.correlationType);
+            $('#correlationProperty').val(jsonObj.correlationProperty);
+            $('#weighted').val(jsonObj.weighted);
+            $('#centralityType').val(jsonObj.centralityType);
+            $('#threshold').val(parseFloat(jsonObj.threshold));
+        } else {
+            $('#numberPCAComponents').val(parseInt(jsonObj.numberPCAComponents));
+        }
+        $('#selectTotal').val(parseInt(jsonObj.selectTotal));
+        $('#selectPerIteration').val(parseInt(jsonObj.selectPerIteration));
+        $('#evaluationType').val(jsonObj.evaluationType);
+
+        for (var e in allSliders) {
+            $.each(allSliders[e], function(key, value) {
+                valueOutput($('#'+e)[0]);
+            });
+        }
+
+        setCurrentCommand();
+    }
+
     function readInputFiles() {
         $.ajax({
             url: 'readFiles.php',
@@ -361,7 +400,7 @@ function updateValues(id) {
             var temp = commandsJSON.versions[i].title.split(" ");
             $('#minimumCount').val(parseInt(temp[temp.indexOf("-min") + 1]));
             $('#numberPCAComponents').val(parseInt(temp[temp.indexOf("-p") + 1]));
-            $('#threshold').val(parseInt(temp[temp.indexOf("-th") + 1]));
+            $('#threshold').val(parseFloat(temp[temp.indexOf("-th") + 1]));
             $('#selectTotal').val(parseInt(temp[temp.indexOf("-st") + 1]));
             $('#selectPerIteration').val(parseInt(temp[temp.indexOf("-si") + 1]));
             $('#conditioningType').val(temp[temp.indexOf("-c") + 1]);
@@ -379,6 +418,8 @@ function updateValues(id) {
         });
     }
 }
+
+
 
 function pressRun() {
     var cmdstr = commandString.split(" ").join("^");
