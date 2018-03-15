@@ -178,6 +178,18 @@ function drawTree(dataJSON) {
         }
 
     });
+
+    network.on("afterDrawing", function (params) {
+        if (nodes.length === 1) {
+            network.fit();
+        }
+        else if (nodes.length > 1) {
+            network.fit({
+                nodes:[totalNodes, totalNodes-1],
+                animation: true
+            });
+        }
+    });
 }
 
 // Destroy the tree-network
