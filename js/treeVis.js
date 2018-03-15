@@ -14,6 +14,7 @@ const DEFAULT_COLOR = '#70f36c';
 const CURRENT_VERSION_COLOR = '#8bc3fb';
 const SELECTED_COLOR = '#f3b7b7';
 const HOVER_PREVIEW_COLOR = '#f3ac4f';
+var first_time = true;
 
 // create an array with edges
 var nodes = new vis.DataSet();
@@ -180,6 +181,14 @@ function drawTree(dataJSON) {
     });
 
     network.on("afterDrawing", function (params) {
+        if (first_time) {
+            setTimeout(focusOnNodes, 2500);
+        }
+    });
+}
+
+function focusOnNodes() {
+    if (first_time) {
         if (nodes.length === 1) {
             network.fit();
         }
@@ -189,8 +198,10 @@ function drawTree(dataJSON) {
                 animation: true
             });
         }
-    });
+        first_time = false;
+    }
 }
+
 
 // Destroy the tree-network
 function destroyTree() {
