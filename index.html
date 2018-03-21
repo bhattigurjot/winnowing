@@ -27,8 +27,8 @@
             <input type="file" name="fileToUpload" id="fileToUpload" accept=".csv" required>
             <input type="submit" value="Upload File" name="submit">
         </form>
-        Select criteria/parameters file to upload:
-        <input type="file" name="fileToUpload" id="fileToUpload2" accept=".json">
+        <!--Select criteria/parameters file to upload:-->
+        <!--<input type="file" name="fileToUpload" id="fileToUpload2" accept=".json">-->
     </div>
 
     <div class="box" style="left: 450px; top: 80px;">
@@ -133,6 +133,12 @@
                 <label for="selectPerIterationAll">All</label>
                 <br>
                 <input type="range" id="selectPerIteration">
+            </fieldset>
+            <fieldset>
+                <input id="listTotalAndIterationCheck" type="checkbox" value="manual">
+                <label for="listTotalAndIterationCheck">List</label>
+                <br>
+                <textarea id="listTotalAndIteration" style="width:100%;" disabled></textarea>
             </fieldset>
         </div>
     </div>

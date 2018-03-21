@@ -6,6 +6,8 @@ var weighted = [true,false];
 var centralityType = ['betweenness','closeness','degree','none'];
 var evaluationType = ['kl_divergence','pca_inertia','anosim','rda'];
 
+var ListLoopArray = null;
+
 var outputToCSV = [true,false];
 var saveToDatabase = [false,true];
 var createGraphs = [false,true];
@@ -104,6 +106,8 @@ $( function() {
     var createGraphsValue = $('#createGraphs');
     var metric1 = $('#metric-1');
     var metric2 = $('#metric-2');
+    var listCheck = $('#listTotalAndIterationCheck');
+    var listText = $('#listTotalAndIteration');
 
 
     // Call init function - setup pipeline
@@ -154,7 +158,19 @@ $( function() {
 
         $('.fieldChange').change(setCurrentCommand);
 
-        $('#runButton').click(pressRun);
+        $('#runButton').click(function() {
+            if (listCheck.is(':checked')) {
+                ListLoopArray = listText.val().split('\n');
+                for(var i=0; i<ListLoopArray.length; i++) {
+                    ListLoopArray[i] = ListLoopArray[i].replace('\t', ' ');
+                }
+                ListLoopArray = ListLoopArray.filter(String);
+                // console.log(ListLoopArray);
+                pressRun(1,ListLoopArray.length);
+            } else {
+                pressRun(1,1);
+            }
+        });
 
         selectTotalAllValue.click(function () {
            if (selectTotalAllValue.is(':checked')) {
@@ -186,8 +202,40 @@ $( function() {
             setCurrentCommand();
         });
 
+        listCheck.click(function () {
+            if (listCheck.is(':checked')) {
+
+                listText.prop("disabled", false);
+
+                selectTotalAllValue.prop("disabled", true);
+                selectTotalValue.prop( "disabled", true );
+
+                stText.prop( "disabled", true);
+
+                selectPerIterationAllValue.prop("disabled", true);
+                selectPerIterationValue.prop( "disabled", true );
+
+                siText.prop( "disabled", true);
+            } else {
+                listText.prop("disabled", true);
+
+                selectTotalAllValue.prop("disabled", false);
+                selectTotalValue.prop( "disabled", false );
+
+                stText.val(parseInt(selectTotalValue.val()));
+                stText.prop( "disabled", false);
+
+                selectPerIterationAllValue.prop("disabled", false);
+                selectPerIterationValue.prop( "disabled", false );
+
+                siText.val(parseInt(selectPerIterationValue.val()));
+                siText.prop( "disabled", false);
+            }
+        });
+
         drawTree(commandsJSON);
     }
+
 
     $('#uploadFileForm').submit(function (e) {
         e.preventDefault();
@@ -419,10 +467,19 @@ function updateValues(id) {
     }
 }
 
+function pressRun(n,t) {
+    var commandStringArray = commandString.split(' ');
+    if (t > 1) {
+        var temp = ListLoopArray[n-1].split(' ');
+        selectTotalCorrectedValue = temp[0];
+        selectPerIterationCorrectedValue = temp[1];
+        commandStringArray[commandStringArray.indexOf('-st') + 1] = "" + selectTotalCorrectedValue;
+        commandStringArray[commandStringArray.indexOf('-si') + 1] = "" + selectPerIterationCorrectedValue;
 
+        commandString = commandStringArray.join(" ");
+    }
 
-function pressRun() {
-    var cmdstr = commandString.split(" ").join("^");
+    var cmdstr = commandStringArray.join("^");
     console.log("sending: " + cmdstr);
 
     var res = $("#results");
@@ -433,8 +490,12 @@ function pressRun() {
         + currentdate.getHours() + ":"
         + currentdate.getMinutes() + ":"
         + currentdate.getSeconds();
-    res.append(datetime + "<br>");
+
+    res.append("<h2>#################################################################################</h2>");
+    res.append("<h3>Run ("+n+"/"+t+")</h3>");
     res.append(commandString +"<br>");
+    res.append("<h2>#################################################################################</h2>");
+    res.append(datetime + "<br>");
 
     addToCommandJSON(commandString);
     //drawTree(commandsJSON);
@@ -447,7 +508,7 @@ function pressRun() {
             val: JSON.stringify(commandsJSON)
         },
         success: function(response) {
-            requestListener(response);
+            requestListener(response, n, t);
         },
 
         error: function () {
@@ -457,7 +518,7 @@ function pressRun() {
     $('body').css('cursor', 'progress');
 }
 
-function requestListener (response) {
+function requestListener (response, n, t) {
     commandResponse = response;
 
     var filename1;
@@ -471,6 +532,8 @@ function requestListener (response) {
 
     if (commandResponse === "") {
         commandResponse = "No response from program execution."
+        alert(commandResponse);
+        return;
     } else {
         // draw tree
         addToCommandJSON(commandString);
@@ -493,22 +556,30 @@ function requestListener (response) {
     res.append("<h4>Result files:</h4>");
     res.append("<p> <a href='output/" + filename1 + "' target='_blank'>" + filename1 + "</a> </p>");
     res.append("<p> <a href='output/" + filename2 + "' target='_blank'>" + filename2 + "</a> </p>");
-    res.append("<p> <a href='output/metric_results.csv' target='_blank'>metric_results.csv</a> </p>");
+    filenameValues = selectTotalCorrectedValue + "by" + selectPerIterationCorrectedValue;
+    res.append("<p> <a href='output/metric_results" + filenameValues + ".csv" + "'target='_blank'>metric_results_" + filenameValues + ".csv</a> </p>");
     if (metricTypeValue === "graph_centrality") {
-        res.append("<p> <a href='output/adj_matrix.csv' target='_blank'>adj_matrix.csv</a> </p>");
-        res.append("<p> <a href='output/graph.graphml' target='_blank'>graph.graphml</a> </p>");
+        res.append("<p> <a href='output/adj_matrix_"+filenameValues+".csv' target='_blank'>adj_matrix_"+filenameValues+".csv</a> </p>");
+        res.append("<p> <a href='output/graph_"+filenameValues+".graphml' target='_blank'>graph_"+filenameValues+".graphml</a> </p>");
     }
     if ($('#createGraphs').val() === "true") {
         res.append("<h4>Graphs:</h4>");
-        res.append("<p> <a href='output/metric_value.png' target='_blank'>metric_value.png</a> </p>");
-        res.append("<p> <a href='output/pca_scatter.png' target='_blank'>pca_scatter.png</a> </p>");
+        res.append("<p> <a href='output/metric_value_"+filenameValues+".png' target='_blank'>metric_value_"+filenameValues+".png</a> </p>");
+        res.append("<p> <a href='output/pca_scatter_"+filenameValues+".png' target='_blank'>pca_scatter_"+filenameValues+".png</a> </p>");
         if (metricTypeValue === "graph_centrality") {
             commandString = commandString + " -cg ";
-            res.append("<p> <a href='output/graph_network.graphml' target='_blank'>graph_network.graphml</a> </p>");
-            res.append("<p> <a href='output/graph_network.png' target='_blank'>graph_network.png</a> </p>");
+            res.append("<p> <a href='output/graph_network_"+filenameValues+".graphml' target='_blank'>graph_network_"+filenameValues+".graphml</a> </p>");
+            res.append("<p> <a href='output/graph_network_"+filenameValues+".png' target='_blank'>graph_network_"+filenameValues+".png</a> </p>");
         }
     }
 
     res.append(commandResponse);
     $('body').css('cursor', 'auto');
+
+    if (t > 1) {
+        n += 1;
+        if (n <= t) {
+            pressRun(n,t);
+        }
+    }
 }
