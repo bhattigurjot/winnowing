@@ -530,6 +530,9 @@ function requestListener (response, n, t) {
     parts[0] = "OTU           Metric           Abundance";
     commandResponse = parts.join("<br>");
 
+    var folderName = parts[parts.length-1].split('<br>')[1];
+    console.log(folderName);
+
     if (commandResponse === "") {
         commandResponse = "No response from program execution."
         alert(commandResponse);
@@ -554,22 +557,22 @@ function requestListener (response, n, t) {
 
     var res = $("#results");
     res.append("<h4>Result files:</h4>");
-    res.append("<p> <a href='output/" + filename1 + "' target='_blank'>" + filename1 + "</a> </p>");
-    res.append("<p> <a href='output/" + filename2 + "' target='_blank'>" + filename2 + "</a> </p>");
+    res.append("<p> <a href='" + folderName + "/" + filename1 + "' target='_blank'>" + filename1 + "</a> </p>");
+    res.append("<p> <a href='" + folderName + "/" + filename2 + "' target='_blank'>" + filename2 + "</a> </p>");
     filenameValues = selectTotalCorrectedValue + "by" + selectPerIterationCorrectedValue;
-    res.append("<p> <a href='output/metric_results" + filenameValues + ".csv" + "'target='_blank'>metric_results_" + filenameValues + ".csv</a> </p>");
+    res.append("<p> <a href='" + folderName + "/" + "metric_results_" + filenameValues + ".csv" + "'target='_blank'>metric_results_" + filenameValues + ".csv</a> </p>");
     if (metricTypeValue === "graph_centrality") {
-        res.append("<p> <a href='output/adj_matrix_"+filenameValues+".csv' target='_blank'>adj_matrix_"+filenameValues+".csv</a> </p>");
-        res.append("<p> <a href='output/graph_"+filenameValues+".graphml' target='_blank'>graph_"+filenameValues+".graphml</a> </p>");
+        res.append("<p> <a href='" + folderName + "/" + "adj_matrix_"+filenameValues+".csv' target='_blank'>adj_matrix_"+filenameValues+".csv</a> </p>");
+        res.append("<p> <a href='" + folderName + "/" + "graph_"+filenameValues+".graphml' target='_blank'>graph_"+filenameValues+".graphml</a> </p>");
     }
     if ($('#createGraphs').val() === "true") {
         res.append("<h4>Graphs:</h4>");
-        res.append("<p> <a href='output/metric_value_"+filenameValues+".png' target='_blank'>metric_value_"+filenameValues+".png</a> </p>");
-        res.append("<p> <a href='output/pca_scatter_"+filenameValues+".png' target='_blank'>pca_scatter_"+filenameValues+".png</a> </p>");
+        res.append("<p> <a href='" + folderName + "/" + "metric_value_"+filenameValues+".png' target='_blank'>metric_value_"+filenameValues+".png</a> </p>");
+        res.append("<p> <a href='" + folderName + "/" + "pca_scatter_"+filenameValues+".png' target='_blank'>pca_scatter_"+filenameValues+".png</a> </p>");
         if (metricTypeValue === "graph_centrality") {
             commandString = commandString + " -cg ";
-            res.append("<p> <a href='output/graph_network_"+filenameValues+".graphml' target='_blank'>graph_network_"+filenameValues+".graphml</a> </p>");
-            res.append("<p> <a href='output/graph_network_"+filenameValues+".png' target='_blank'>graph_network_"+filenameValues+".png</a> </p>");
+            res.append("<p> <a href='" + folderName + "/" + "graph_network_"+filenameValues+".graphml' target='_blank'>graph_network_"+filenameValues+".graphml</a> </p>");
+            res.append("<p> <a href='" + folderName + "/" + "graph_network_"+filenameValues+".png' target='_blank'>graph_network_"+filenameValues+".png</a> </p>");
         }
     }
 

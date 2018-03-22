@@ -14,10 +14,14 @@
         $st = $cmdArr[$stIndex + 1];
         $si = $cmdArr[$siIndex + 1];
 
+        $folder = "output/".date('m-d-Y-H-i-s');
+        mkdir($folder, 0777, true);
+        echo '<br>'.$folder;
+
         $glob = glob('input/*-*.csv');
         foreach ($glob as $f) {
             $file = basename($f);
-            rename($f,"output/$file");
+            rename($f,$folder.'/'.$file);
         }
 
         $glob = glob('*.{png,csv,graphml}', GLOB_BRACE);
@@ -28,7 +32,8 @@
             $temp[0] = $temp[0] . "_" . $st . "by" . $si;
 
             $newFileName = implode(".",$temp);
-            rename($f,"output/$newFileName");
+
+            rename($f,$folder.'/'.$newFileName);
         }
 	}
 	if (isset($_POST['val'])) {
