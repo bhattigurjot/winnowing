@@ -159,6 +159,15 @@ $( function() {
         $('.fieldChange').change(setCurrentCommand);
 
         $('#runButton').click(function() {
+            var currentdate = new Date();
+            var date_time = ""
+                + (currentdate.getMonth()+1)  + "-"
+                + currentdate.getDate() + "-"
+                + currentdate.getFullYear() + "-"
+                + currentdate.getHours() + "-"
+                + currentdate.getMinutes() + "-"
+                + currentdate.getSeconds();
+
             if (listCheck.is(':checked')) {
                 ListLoopArray = listText.val().split('\n');
                 for(var i=0; i<ListLoopArray.length; i++) {
@@ -166,9 +175,9 @@ $( function() {
                 }
                 ListLoopArray = ListLoopArray.filter(String);
                 // console.log(ListLoopArray);
-                pressRun(1,ListLoopArray.length);
+                pressRun(1,ListLoopArray.length,date_time,0);
             } else {
-                pressRun(1,1);
+                pressRun(1,1,date_time,0);
             }
         });
 
@@ -467,7 +476,7 @@ function updateValues(id) {
     }
 }
 
-function pressRun(n,t) {
+function pressRun(n,t,d_t,shouldZip) {
     var commandStringArray = commandString.split(' ');
     if (t > 1) {
         var temp = ListLoopArray[n-1].split(' ');
@@ -483,13 +492,14 @@ function pressRun(n,t) {
     console.log("sending: " + cmdstr);
 
     var res = $("#results");
-    var currentdate = new Date();
-    var datetime = "<p>Run date: " + currentdate.getDate() + "/"
-        + (currentdate.getMonth()+1)  + "/"
-        + currentdate.getFullYear() + " @ "
-        + currentdate.getHours() + ":"
-        + currentdate.getMinutes() + ":"
-        + currentdate.getSeconds();
+    // var currentdate = new Date();
+    // var datetime = "<p>Run date: " + currentdate.getDate() + "/"
+    //     + (currentdate.getMonth()+1)  + "/"
+    //     + currentdate.getFullYear() + " @ "
+    //     + currentdate.getHours() + ":"
+    //     + currentdate.getMinutes() + ":"
+    //     + currentdate.getSeconds();
+    var datetime = "<p>Run date: " + d_t + "</p>";
 
     res.append("<h2>#################################################################################</h2>");
     res.append("<h3>Run ("+n+"/"+t+")</h3>");
@@ -505,10 +515,12 @@ function pressRun(n,t) {
         type: 'POST',
         data: {
             arg: cmdstr,
+            date: d_t,
+            zip: shouldZip,
             val: JSON.stringify(commandsJSON)
         },
         success: function(response) {
-            requestListener(response, n, t);
+            requestListener(response, n, t, d_t);
         },
 
         error: function () {
@@ -518,7 +530,7 @@ function pressRun(n,t) {
     $('body').css('cursor', 'progress');
 }
 
-function requestListener (response, n, t) {
+function requestListener (response, n, t, d_t) {
     commandResponse = response;
 
     var filename1;
@@ -530,8 +542,9 @@ function requestListener (response, n, t) {
     parts[0] = "OTU           Metric           Abundance";
     commandResponse = parts.join("<br>");
 
-    var folderName = parts[parts.length-1].split('<br>')[1];
-    console.log(folderName);
+    // var folderName = parts[parts.length-1].split('<br>')[1];
+    var folderName = "output/" + d_t;
+    // console.log(folderName);
 
     if (commandResponse === "") {
         commandResponse = "No response from program execution."
@@ -581,8 +594,14 @@ function requestListener (response, n, t) {
 
     if (t > 1) {
         n += 1;
-        if (n <= t) {
-            pressRun(n,t);
+        if (n < t) {
+            pressRun(n,t,d_t,0);
+            console.log("oy");
+        } else if (n === t) {
+            pressRun(n,t,d_t,1);
+            console.log("yo");
+        } else {
+            res.append("<p> <a href='" + folderName + ".zip' target='_blank'>All_Results.zip</a> </p>");
         }
     }
 }
