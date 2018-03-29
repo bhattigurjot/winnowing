@@ -132,6 +132,11 @@
 /*position:relative;*/
 /*top:1px;*/
 /*}*/
+#prefix {
+    position: absolute;
+    top: 600px;
+    left: 250px;
+}
 
 /* Sliders */
 input[type=range] {

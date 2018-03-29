@@ -108,6 +108,8 @@ $( function() {
     var metric2 = $('#metric-2');
     var listCheck = $('#listTotalAndIterationCheck');
     var listText = $('#listTotalAndIteration');
+    var prefixCheck = $('#prefix-check');
+    var prefixText = $('#prefix-text');
 
 
     // Call init function - setup pipeline
@@ -168,6 +170,12 @@ $( function() {
                 + currentdate.getMinutes() + "-"
                 + currentdate.getSeconds();
 
+            var tempPrefix = "";
+
+            if (prefixCheck.is(':checked')) {
+                tempPrefix = prefixText.val() + "_";
+            }
+
             if (listCheck.is(':checked')) {
                 ListLoopArray = listText.val().split('\n');
                 for(var i=0; i<ListLoopArray.length; i++) {
@@ -175,9 +183,18 @@ $( function() {
                 }
                 ListLoopArray = ListLoopArray.filter(String);
                 // console.log(ListLoopArray);
-                pressRun(1,ListLoopArray.length,date_time,0);
+                pressRun(1,ListLoopArray.length,date_time,tempPrefix,0);
             } else {
-                pressRun(1,1,date_time,0);
+                pressRun(1,1,date_time,tempPrefix,0);
+            }
+        });
+
+        prefixCheck.click(function () {
+            if (prefixCheck.is(':checked')) {
+                prefixText.prop( "disabled", false );
+                // prefixText.parent().find('label')[0]['innerHTML'] = 'selectTotal: all';
+            } else {
+                prefixText.prop( "disabled", true );
             }
         });
 
@@ -476,7 +493,7 @@ function updateValues(id) {
     }
 }
 
-function pressRun(n,t,d_t,shouldZip) {
+function pressRun(n,t,d_t,p_f_n,shouldZip) {
     var commandStringArray = commandString.split(' ');
     if (t > 1) {
         var temp = ListLoopArray[n-1].split(' ');
@@ -517,10 +534,11 @@ function pressRun(n,t,d_t,shouldZip) {
             arg: cmdstr,
             date: d_t,
             zip: shouldZip,
+            prefix: p_f_n,
             val: JSON.stringify(commandsJSON)
         },
         success: function(response) {
-            requestListener(response, n, t, d_t);
+            requestListener(response, n, t, d_t, p_f_n);
         },
 
         error: function () {
@@ -530,7 +548,7 @@ function pressRun(n,t,d_t,shouldZip) {
     $('body').css('cursor', 'progress');
 }
 
-function requestListener (response, n, t, d_t) {
+function requestListener (response, n, t, d_t, p_f_n) {
     commandResponse = response;
 
     var filename1;
@@ -562,7 +580,7 @@ function requestListener (response, n, t, d_t) {
         } else {
             temp = $('#centralityType').val();
         }
-        var namebase = selectedFileName.substring(0, selectedFileName.length - 4) + "-" + metricTypeValue + "-" + temp + "-select" +  selectTotalCorrectedValue + "by" + selectPerIterationCorrectedValue;
+        var namebase = p_f_n+selectedFileName.substring(0, selectedFileName.length - 4) + "-" + metricTypeValue + "-" + temp + "-select" +  selectTotalCorrectedValue + "by" + selectPerIterationCorrectedValue;
         filename1 = namebase + ".csv";
         filename2 = namebase + "-abundances.csv";
     }
@@ -573,19 +591,19 @@ function requestListener (response, n, t, d_t) {
     res.append("<p> <a href='" + folderName + "/" + filename1 + "' target='_blank'>" + filename1 + "</a> </p>");
     res.append("<p> <a href='" + folderName + "/" + filename2 + "' target='_blank'>" + filename2 + "</a> </p>");
     filenameValues = selectTotalCorrectedValue + "by" + selectPerIterationCorrectedValue;
-    res.append("<p> <a href='" + folderName + "/" + "metric_results_" + filenameValues + ".csv" + "'target='_blank'>metric_results_" + filenameValues + ".csv</a> </p>");
+    res.append("<p> <a href='" + folderName + "/" + p_f_n + "metric_results_" + filenameValues + ".csv" + "'target='_blank'>"+p_f_n+"metric_results_" + filenameValues + ".csv</a> </p>");
     if (metricTypeValue === "graph_centrality") {
-        res.append("<p> <a href='" + folderName + "/" + "adj_matrix_"+filenameValues+".csv' target='_blank'>adj_matrix_"+filenameValues+".csv</a> </p>");
-        res.append("<p> <a href='" + folderName + "/" + "graph_"+filenameValues+".graphml' target='_blank'>graph_"+filenameValues+".graphml</a> </p>");
+        res.append("<p> <a href='" + folderName + "/" + p_f_n + "adj_matrix_"+filenameValues+".csv' target='_blank'>"+p_f_n+"adj_matrix_"+filenameValues+".csv</a> </p>");
+        res.append("<p> <a href='" + folderName + "/" + p_f_n + "graph_"+filenameValues+".graphml' target='_blank'>"+p_f_n+"graph_"+filenameValues+".graphml</a> </p>");
     }
     if ($('#createGraphs').val() === "true") {
         res.append("<h4>Graphs:</h4>");
-        res.append("<p> <a href='" + folderName + "/" + "metric_value_"+filenameValues+".png' target='_blank'>metric_value_"+filenameValues+".png</a> </p>");
-        res.append("<p> <a href='" + folderName + "/" + "pca_scatter_"+filenameValues+".png' target='_blank'>pca_scatter_"+filenameValues+".png</a> </p>");
+        res.append("<p> <a href='" + folderName + "/" + p_f_n + "metric_value_"+filenameValues+".png' target='_blank'>"+p_f_n+"metric_value_"+filenameValues+".png</a> </p>");
+        res.append("<p> <a href='" + folderName + "/" + p_f_n + "pca_scatter_"+filenameValues+".png' target='_blank'>"+p_f_n+"pca_scatter_"+filenameValues+".png</a> </p>");
         if (metricTypeValue === "graph_centrality") {
             commandString = commandString + " -cg ";
-            res.append("<p> <a href='" + folderName + "/" + "graph_network_"+filenameValues+".graphml' target='_blank'>graph_network_"+filenameValues+".graphml</a> </p>");
-            res.append("<p> <a href='" + folderName + "/" + "graph_network_"+filenameValues+".png' target='_blank'>graph_network_"+filenameValues+".png</a> </p>");
+            res.append("<p> <a href='" + folderName + "/" + p_f_n + "graph_network_"+filenameValues+".graphml' target='_blank'>"+p_f_n+"graph_network_"+filenameValues+".graphml</a> </p>");
+            res.append("<p> <a href='" + folderName + "/" + p_f_n + "graph_network_"+filenameValues+".png' target='_blank'>"+p_f_n+"graph_network_"+filenameValues+".png</a> </p>");
         }
     }
 
@@ -595,11 +613,9 @@ function requestListener (response, n, t, d_t) {
     if (t > 1) {
         n += 1;
         if (n < t) {
-            pressRun(n,t,d_t,0);
-            console.log("oy");
+            pressRun(n,t,d_t,p_f_n,0);
         } else if (n === t) {
-            pressRun(n,t,d_t,1);
-            console.log("yo");
+            pressRun(n,t,d_t,p_f_n,1);
         } else {
             res.append("<p> <a href='" + folderName + ".zip' target='_blank'>All_Results.zip</a> </p>");
         }
