@@ -173,7 +173,9 @@ $( function() {
             var tempPrefix = "";
 
             if (prefixCheck.is(':checked')) {
-                tempPrefix = prefixText.val() + "_";
+                if (prefixText.val()) {
+                    tempPrefix = prefixText.val() + "_";
+                }
             }
 
             if (listCheck.is(':checked')) {
