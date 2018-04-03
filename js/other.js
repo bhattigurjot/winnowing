@@ -179,7 +179,7 @@ $( function() {
             if (listCheck.is(':checked')) {
                 ListLoopArray = listText.val().split('\n');
                 for(var i=0; i<ListLoopArray.length; i++) {
-                    ListLoopArray[i] = ListLoopArray[i].replace('\t', ' ');
+                    ListLoopArray[i] = ListLoopArray[i].replace(/[\s]+/g, ' ');
                 }
                 ListLoopArray = ListLoopArray.filter(String);
                 // console.log(ListLoopArray);
