@@ -3,7 +3,7 @@ var metricType = ['pca_importance','graph_centrality'];
 var correlationType = ['spearman','MIC'];
 var correlationProperty = ['positive','negative','both'];
 var weighted = [true,false];
-var centralityType = ['betweenness','closeness','degree','none'];
+var centralityType = ['betweenness','closeness','degree', 'eigenvector', 'none'];
 var evaluationType = ['kl_divergence','pca_inertia','anosim','rda'];
 
 var ListLoopArray = null;
